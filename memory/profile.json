@@ -1,0 +1,161 @@
+{
+  "full_name": "Divyansh Sharma",
+  "headline": "Software Engineer | AI/LLM Integration | Full-Stack Development",
+  "summary": "2nd-year CS sophomore at SRM Institute of Science and Technology (Delhi NCR) with CGPA 9.2. Hands-on experience building AI-integrated products and backend services. Former intern at Buzz to Brand (FastAPI, Gemini API, AWS) and Social House Learning (PRDs, Next.js). Passionate about LLM integration, semantic search, and product-oriented engineering.",
+  "contact": {
+    "email": "divyansh@example.com",
+    "phone": "+91-9876543210",
+    "location": "Meerut, Uttar Pradesh, India",
+    "github": "github.com/divyansh",
+    "linkedin": "linkedin.com/in/divyansh",
+    "portfolio": null
+  },
+  "skills": [
+    {"name": "Python",           "category": "language",  "level": "advanced",      "years": 2.0,  "evidence": ["Buzz to Brand", "SkinSoul", "AI Recruiter"]},
+    {"name": "TypeScript",       "category": "language",  "level": "intermediate",  "years": 1.0,  "evidence": ["AI Recruiter frontend", "Social House Learning"]},
+    {"name": "JavaScript",       "category": "language",  "level": "intermediate",  "years": 1.5,  "evidence": ["DevCollab", "Campus Pulse"]},
+    {"name": "SQL",              "category": "language",  "level": "intermediate",  "years": 1.5,  "evidence": ["Buzz to Brand", "AI Recruiter"]},
+    {"name": "FastAPI",          "category": "backend",   "level": "advanced",      "years": 1.5,  "evidence": ["Buzz to Brand", "SkinSoul", "AI Recruiter"]},
+    {"name": "Node.js",          "category": "backend",   "level": "intermediate",  "years": 1.0,  "evidence": ["DevCollab", "Campus Pulse"]},
+    {"name": "SQLAlchemy",       "category": "backend",   "level": "intermediate",  "years": 1.0,  "evidence": ["AI Recruiter"]},
+    {"name": "Celery",           "category": "backend",   "level": "intermediate",  "years": 0.5,  "evidence": ["AI Recruiter"]},
+    {"name": "Redis",            "category": "backend",   "level": "intermediate",  "years": 1.0,  "evidence": ["SkinSoul", "AI Recruiter", "DevCollab"]},
+    {"name": "Next.js",          "category": "frontend",  "level": "intermediate",  "years": 1.0,  "evidence": ["AI Recruiter", "Social House Learning"]},
+    {"name": "React",            "category": "frontend",  "level": "intermediate",  "years": 1.5,  "evidence": ["AI Recruiter", "Campus Pulse"]},
+    {"name": "Tailwind CSS",     "category": "frontend",  "level": "intermediate",  "years": 1.0,  "evidence": ["AI Recruiter"]},
+    {"name": "Gemini API",       "category": "ai_ml",     "level": "advanced",      "years": 1.0,  "evidence": ["SkinSoul", "Buzz to Brand"]},
+    {"name": "OpenAI API",       "category": "ai_ml",     "level": "intermediate",  "years": 0.5,  "evidence": ["AI Recruiter"]},
+    {"name": "LangChain",        "category": "ai_ml",     "level": "intermediate",  "years": 0.5,  "evidence": ["open source repo 120+ stars"]},
+    {"name": "pgvector",         "category": "ai_ml",     "level": "intermediate",  "years": 0.5,  "evidence": ["AI Recruiter", "SkinSoul"]},
+    {"name": "Prompt engineering","category": "ai_ml",    "level": "advanced",      "years": 1.0,  "evidence": ["SkinSoul prompt chaining", "AI Recruiter"]},
+    {"name": "Docker",           "category": "devops",    "level": "intermediate",  "years": 1.0,  "evidence": ["Buzz to Brand", "AI Recruiter"]},
+    {"name": "AWS EC2",          "category": "devops",    "level": "beginner",      "years": 0.5,  "evidence": ["Buzz to Brand production deployment"]},
+    {"name": "GitHub Actions",   "category": "devops",    "level": "beginner",      "years": 0.5,  "evidence": ["AI Recruiter CI/CD"]},
+    {"name": "PostgreSQL",       "category": "database",  "level": "intermediate",  "years": 1.5,  "evidence": ["Buzz to Brand", "AI Recruiter", "SkinSoul"]},
+    {"name": "MongoDB",          "category": "database",  "level": "intermediate",  "years": 1.0,  "evidence": ["DevCollab", "Campus Pulse"]},
+    {"name": "PRD writing",      "category": "pm",        "level": "intermediate",  "years": 0.5,  "evidence": ["Social House Learning — 3 shipped features"]}
+  ],
+  "projects": [
+    {
+      "name": "SkinSoul - AI Skin Analysis App",
+      "description": "Mobile-first app that analyses skin conditions from selfies and generates personalised skincare routines. Gemini Vision model classifies condition type and severity; a prompt-chained LLM step produces a morning/evening routine.",
+      "tech_stack": ["Python", "FastAPI", "Gemini Vision API", "React Native", "Redis", "PostgreSQL", "pgvector"],
+      "period": "Aug 2024 - Present",
+      "status": "Active",
+      "metrics": [
+        "88% classification accuracy on held-out test set of 500 images",
+        "60% reduction in cold-start latency via Redis caching",
+        "1st place, SRM Hackathon 2024 (200 competing teams)"
+      ],
+      "url": null,
+      "highlights": [
+        "Gemini Vision API for multi-class skin condition classification",
+        "Prompt chaining: classification -> severity grading -> routine generation",
+        "Redis caching keyed on skin type hash",
+        "pgvector similarity search for product reviews"
+      ]
+    },
+    {
+      "name": "AI Recruiter - Personal AI Job Search Assistant",
+      "description": "Full-stack AI recruiter application to maximise callback and interview rates. Semantically matches resumes to job listings, generates tailored cover letters, tracks application pipeline.",
+      "tech_stack": ["Python 3.13", "FastAPI", "PostgreSQL", "pgvector", "Redis", "Celery", "Next.js 15", "TypeScript", "Tailwind CSS"],
+      "period": "Oct 2024 - Present",
+      "status": "Active development",
+      "metrics": [
+        "3x higher callback rate in manual testing vs generic applications",
+        "<100ms API P95 latency for all sync endpoints"
+      ],
+      "url": null,
+      "highlights": [
+        "Clean 4-layer architecture: endpoint -> service -> repository -> DB",
+        "pgvector cosine similarity for resume-to-job semantic matching",
+        "Generic BaseRepository[T] eliminates CRUD duplication across 5 domain models",
+        "Celery + Redis for async embedding generation"
+      ]
+    },
+    {
+      "name": "DevCollab - Real-time Collaborative Code Editor",
+      "description": "Browser-based code editor supporting real-time collaboration with conflict-free editing, syntax highlighting, and live cursor tracking.",
+      "tech_stack": ["Next.js 14", "Node.js", "Socket.io", "WebSockets", "MongoDB", "Redis", "JWT"],
+      "period": "Mar 2024 - Jun 2024",
+      "status": "Completed",
+      "metrics": [
+        "200 concurrent sessions in production",
+        "<100ms edit propagation latency on average"
+      ],
+      "url": null,
+      "highlights": [
+        "Operational Transformation (OT) algorithm for conflict-free concurrent edits",
+        "Socket.io rooms with Redis pub/sub for cross-instance broadcasting",
+        "JWT with refresh-token rotation (15 min access / 7 day refresh)",
+        "Role-based access control at both API and socket layer"
+      ]
+    },
+    {
+      "name": "Campus Pulse - Student Event Discovery Platform",
+      "description": "Internal platform for SRM Delhi NCR students to discover, register for, and track campus events. Replaced a fragmented WhatsApp-group announcement system.",
+      "tech_stack": ["React", "Node.js", "Express", "MongoDB", "Cloudinary"],
+      "period": "Sep 2023 - Dec 2023",
+      "status": "Deployed at SRM Delhi NCR",
+      "metrics": [
+        "800+ registered students within first month",
+        "Replaced manual announcements for 12 student clubs"
+      ],
+      "url": null,
+      "highlights": [
+        "Cloudinary for event poster uploads with automatic WebP conversion",
+        "Email notification system via Nodemailer"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "title": "Software Engineering Intern",
+      "company": "Buzz to Brand",
+      "period": "Jun 2024 - Aug 2024",
+      "location": null,
+      "bullets": [
+        "Built REST APIs with FastAPI serving 10K+ daily requests with <50ms P95 latency",
+        "Integrated Gemini API for automated content generation, reducing manual effort by 70%",
+        "Designed PostgreSQL schemas and optimised slow queries, cutting response time by 40%",
+        "Deployed services on AWS EC2 with Docker, achieving 99.8% uptime"
+      ],
+      "tech_used": ["FastAPI", "Gemini API", "PostgreSQL", "Docker", "AWS EC2"]
+    },
+    {
+      "title": "Product & Tech Intern",
+      "company": "Social House Learning",
+      "period": "Jan 2024 - May 2024",
+      "location": null,
+      "bullets": [
+        "Wrote PRDs and user stories for 3 product features shipped to 5000+ students",
+        "Built a Next.js dashboard for live course analytics, integrating 4 external APIs",
+        "Reduced onboarding drop-off by 25% through A/B-tested UX improvements"
+      ],
+      "tech_used": ["Next.js", "PostgreSQL", "Figma"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "SRM Institute of Science and Technology, Delhi NCR",
+      "degree": "B.Tech",
+      "field": "Computer Science & Engineering",
+      "period": "2023 - 2027",
+      "gpa": "9.2/10",
+      "highlights": ["Dean's List Semester 1 & 2", "Top 5% of cohort"]
+    }
+  ],
+  "achievements": [
+    {"title": "SRM Hackathon 2024 - 1st Place",       "type": "hackathon",     "date": "October 2024",   "description": "Won with SkinSoul AI skin analysis app", "impact": "1st of 200 teams, Rs 50,000 prize + incubation"},
+    {"title": "Smart India Hackathon 2024 - Finalist", "type": "hackathon",     "date": "December 2024",  "description": "National hackathon, AI health diagnostics", "impact": "Top 50 of 10,000+ teams nationwide"},
+    {"title": "Dean's List Semester 1 & 2",            "type": "academic",      "date": "2023-2024",      "description": "CGPA 9.2/10", "impact": "Top 5% of cohort"},
+    {"title": "GDSC Technical Lead",                   "type": "leadership",    "date": "2024-25",        "description": "Organised 8 workshops for 200+ students, mentored 15 junior members", "impact": "2nd place GDSC Solutions Challenge regional"},
+    {"title": "LangChain integration repo",            "type": "open_source",   "date": "2024",           "description": "Open-source LangChain integration example repository", "impact": "120+ GitHub stars"},
+    {"title": "FastAPI docs contributions",            "type": "open_source",   "date": "2024",           "description": "3 merged bug-fix PRs to FastAPI documentation", "impact": null},
+    {"title": "LeetCode Knight Badge",                 "type": "competitive",   "date": "2024",           "description": "400+ problems solved", "impact": "Top 5% globally"},
+    {"title": "AWS Cloud Practitioner",                "type": "certification", "date": "2024",           "description": null, "impact": null},
+    {"title": "Google AI Essentials",                  "type": "certification", "date": "2024",           "description": null, "impact": null}
+  ],
+  "sources": ["memory/resume.pdf", "memory/projects.md", "memory/achievements.md"],
+  "version": "1.0.0"
+}
