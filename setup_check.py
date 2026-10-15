@@ -25,7 +25,7 @@ def check(label: str, ok: bool, fix: str = "") -> bool:
     return ok
 
 
-def main() -> None:
+def main() -> int:
     from config import get_settings
     settings = get_settings()
     all_ok = True
@@ -46,7 +46,7 @@ def main() -> None:
         "anthropic":            "pip install anthropic",
         "pydantic":             "pip install pydantic pydantic-settings",
         "sqlalchemy":           "pip install sqlalchemy aiosqlite",
-        "beautifulsoup4":       "pip install beautifulsoup4",
+        "bs4":                 "pip install beautifulsoup4",
         "pdfminer":             "pip install pdfminer.six",
         "httpx":                "pip install httpx",
         "tenacity":             "pip install tenacity",
@@ -97,14 +97,16 @@ def main() -> None:
             check(f"profile.json is valid JSON", False, f"Fix JSON syntax: {exc}")
             all_ok = False
 
-    check("memory/resume.pdf exists",     settings.RESUME_PATH.exists(),
-          "Place your resume PDF at memory/resume.pdf")
-    check("memory/projects.md exists",    settings.PROJECTS_PATH.exists(),
-          "Create memory/projects.md with your project details")
-    check("memory/achievements.md exists",settings.ACHIEVEMENTS_PATH.exists(),
-          "Create memory/achievements.md with your achievements")
-    check("prompts/personality.md exists",settings.PERSONALITY_PATH.exists(),
-          "Create prompts/personality.md with your voice/tone guide")
+    source_checks = []
+    source_checks.append(check("memory/resume.pdf exists",     settings.RESUME_PATH.exists(),
+          "Place your resume PDF at memory/resume.pdf"))
+    source_checks.append(check("memory/projects.md exists",    settings.PROJECTS_PATH.exists(),
+          "Create memory/projects.md with your project details"))
+    source_checks.append(check("memory/achievements.md exists",settings.ACHIEVEMENTS_PATH.exists(),
+          "Create memory/achievements.md with your achievements"))
+    source_checks.append(check("prompts/personality.md exists",settings.PERSONALITY_PATH.exists(),
+          "Create prompts/personality.md with your voice/tone guide"))
+    all_ok = all_ok and all(source_checks)
 
     # ── Gmail ──────────────────────────────────────────────────────────────────
     print("\n📬 Gmail")
@@ -122,6 +124,7 @@ def main() -> None:
         "Run once to authenticate: python -c \"from database.gmail_auth import get_gmail_service; get_gmail_service()\"",
     )
 
+    all_ok = all_ok and creds_ok and token_ok
     if not creds_ok:
         print("""
   Gmail setup steps:
@@ -167,7 +170,8 @@ def main() -> None:
     else:
         print("❌  Fix the issues above, then re-run: python setup_check.py")
     print()
+    return 0 if all_ok else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
