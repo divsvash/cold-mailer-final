@@ -34,49 +34,29 @@ import json
 import pathlib
 import sys
 import textwrap
-import os
 
 # ── Make sure we can import from career-agent root ────────────────────────────
 ROOT = pathlib.Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
 
-def _check_env() -> None:
-    """Fail fast with a clear message if required config is missing."""
+from config import get_settings, resolve_path
+
+
+def _check_env(settings, profile_path, personality_path) -> None:
     errors = []
-
-    if not os.environ.get("ANTHROPIC_API_KEY") and not (ROOT / ".env").exists():
-        errors.append("  • ANTHROPIC_API_KEY not set. Add it to .env or export it.")
-
-    profile = ROOT / "memory" / "profile.json"
-    if not profile.exists():
-        errors.append(f"  • memory/profile.json not found. Run: python -m agents.candidate_analyzer.main")
-
-    personality = ROOT / "prompts" / "personality.md"
-    if not personality.exists():
-        errors.append(f"  • prompts/personality.md not found.")
-
+    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here":
+        errors.append("Model API key missing. Set ANTHROPIC_API_KEY in .env or the environment.")
+    for path, label in [(profile_path, "Profile"), (personality_path, "Personality guide")]:
+        if not path.is_file():
+            errors.append(f"{label} not found: {path}")
     if errors:
-        print("❌ Setup incomplete:\n" + "\n".join(errors))
-        print("\nRun: python setup_check.py  for a full diagnosis.")
+        print("Setup incomplete:\n" + "\n".join(errors), file=sys.stderr)
         sys.exit(1)
 
 
-def _load_env() -> None:
-    """Load .env file manually (no dotenv dependency required)."""
-    env_file = ROOT / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, _, value = line.partition("=")
-                key = key.strip()
-                value = value.strip().strip('"').strip("'")
-                if key and key not in os.environ:
-                    os.environ[key] = value
-
-
 async def main() -> None:
+    settings = get_settings()
     parser = argparse.ArgumentParser(
         description="Generate outreach email → create Gmail draft",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -106,29 +86,30 @@ async def main() -> None:
     parser.add_argument("--recipient-name",   default=None,  help="Name of the person you're emailing")
     parser.add_argument("--recipient-role",   default=None,  help="Their role, e.g. 'Engineering Manager'")
     parser.add_argument("--job-description",  default=None,  help="Path to job description text file")
-    parser.add_argument("--profile",          default=str(ROOT / "memory" / "profile.json"))
-    parser.add_argument("--personality",      default=str(ROOT / "prompts" / "personality.md"))
+    parser.add_argument("--profile",          default=str(settings.PROFILE_PATH))
+    parser.add_argument("--personality",      default=str(settings.PERSONALITY_PATH))
     parser.add_argument("--dry-run",          action="store_true",
                         help="Print the email but don't create a Gmail draft (no credentials needed)")
     parser.add_argument("--all-variants",     action="store_true",
                         help="Show all 3 variants, not just the best one")
     args = parser.parse_args()
 
-    _load_env()
-    _check_env()
+    profile_path = resolve_path(args.profile)
+    personality_path = resolve_path(args.personality)
+    _check_env(settings, profile_path, personality_path)
 
-    # ── Imports (after env loaded so Anthropic key is available) ──────────────
+    # Imports stay here so --help needs no external service setup.
     from agents.email_generator.engine import EmailGenerationEngine
     from agents.email_generator.schemas import CandidateProfile, CompanyInfo, JobAnalysis
 
     # ── Load candidate profile ─────────────────────────────────────────────────
-    profile_path = pathlib.Path(args.profile)
+    profile_path = resolve_path(args.profile)
     if not profile_path.exists():
         print(f"❌ Profile not found: {profile_path}", file=sys.stderr)
         sys.exit(1)
 
     candidate = CandidateProfile.model_validate(json.loads(profile_path.read_text()))
-    personality = pathlib.Path(args.personality).read_text()
+    personality = personality_path.read_text()
 
     # ── Build company info ─────────────────────────────────────────────────────
     company = CompanyInfo(
@@ -142,7 +123,7 @@ async def main() -> None:
 
     # ── Build job analysis from JD file (or minimal stub) ─────────────────────
     if args.job_description:
-        jd_path = pathlib.Path(args.job_description)
+        jd_path = resolve_path(args.job_description)
         if not jd_path.exists():
             print(f"❌ Job description file not found: {jd_path}", file=sys.stderr)
             sys.exit(1)
@@ -226,11 +207,11 @@ async def main() -> None:
 
     try:
         gmail_service = get_gmail_service(
-            str(ROOT / "credentials.json"),
-            str(ROOT / "token.json"),
+            settings.GMAIL_CREDENTIALS_PATH,
+            settings.GMAIL_TOKEN_PATH,
         )
     except FileNotFoundError:
-        print("❌ credentials.json not found.")
+        print(f"❌ OAuth credentials not found: {settings.GMAIL_CREDENTIALS_PATH}")
         print("   Download it from Google Cloud Console (Gmail API → OAuth2 credentials)")
         print("   and place it in the career-agent/ root directory.")
         sys.exit(1)
@@ -240,9 +221,7 @@ async def main() -> None:
 
     gmail_client = GmailDraftClient(gmail_service)
 
-    db_path = ROOT / "database" / "career_agent.db"
-    db_url  = f"sqlite+aiosqlite:///{db_path}"
-    engine_db = make_engine(db_url)
+    engine_db = make_engine(settings.DATABASE_URL)
     await init_db(engine_db)
     factory = make_session_factory(engine_db)
 
