@@ -15,6 +15,8 @@ INTERVIEW_MUST_HAVE_DISCOUNT = 0.5
 
 
 def compute_fit_score(coverage: SkillCoverage) -> float:
+    if coverage.must_have_total == 0 and coverage.preferred_total == 0:
+        return 0.0
     score = MUST_HAVE_WEIGHT * coverage.must_have_ratio + PREFERRED_WEIGHT * coverage.preferred_ratio
     if coverage.must_have_total > 0 and coverage.must_have_matched == 0:
         score = min(score, ZERO_MUST_HAVE_CAP)
@@ -55,7 +57,7 @@ def derive_strengths(
                    f"{coverage.preferred_total} preferred skills: {', '.join(coverage.matched_preferred)}.",
         ))
     if any(p.metrics for p in candidate.projects):
-        names = ", ".join(p.name for p in candidate.projects if p.metrics)[:3]
+        names = ", ".join([p.name for p in candidate.projects if p.metrics][:3])
         strengths.append(Strength(
             title="Track record of quantified impact",
             detail=f"Projects with measured outcomes: {names}.",
@@ -73,6 +75,10 @@ def derive_concerns(
     candidate: CandidateProfile, job: JobRequirements, coverage: SkillCoverage
 ) -> list[Concern]:
     concerns: list[Concern] = []
+    if coverage.must_have_total == 0 and coverage.preferred_total == 0:
+        concerns.append(Concern(title="Insufficient job requirements",
+                                detail="No skills were supplied; a meaningful fit score cannot be computed.",
+                                severity="high"))
     if coverage.missing_must_haves:
         severity = "high" if coverage.must_have_ratio < 0.5 else "medium"
         concerns.append(Concern(
