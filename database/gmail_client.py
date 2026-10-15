@@ -15,6 +15,10 @@ def _is_retryable(exc: BaseException) -> bool:
 
 
 def build_mime_message(to: str, subject: str, body: str) -> str:
+    if any(c in to + subject for c in ("\r", "\n", "\x00")):
+        raise ValueError("Email header contains prohibited control characters")
+    from pydantic import TypeAdapter, EmailStr
+    to = str(TypeAdapter(EmailStr).validate_python(to))
     message = MIMEText(body)
     message["to"] = to
     message["subject"] = subject
