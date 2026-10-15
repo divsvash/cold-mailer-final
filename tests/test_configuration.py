@@ -114,6 +114,7 @@ def test_candidate_extractor_uses_configured_inputs_and_model(tmp_path, monkeypa
     for key, name in [("RESUME_PATH", "resume.pdf"), ("PROJECTS_PATH", "projects.md"), ("ACHIEVEMENTS_PATH", "achievements.md")]:
         monkeypatch.setenv(key, str(tmp_path / name))
     monkeypatch.setenv("LLM_MODEL", "configured-model")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "offline-test-key")
     client = MagicMock()
     client.messages.create.return_value = SimpleNamespace(content=[SimpleNamespace(text=json.dumps({"full_name": "Test Candidate"}))])
     with patch("agents.candidate_analyzer.extractor.read_pdf", return_value="resume") as pdf, patch("agents.candidate_analyzer.extractor.read_md", return_value="notes") as md, patch("anthropic.Anthropic", return_value=client):

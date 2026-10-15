@@ -147,23 +147,25 @@ class TestEngineHappyPath:
         _engine(client).generate(*_inputs())
         assert client.messages.create.call_count == 2
 
-    def test_system_prompt_contains_fact_sheet(self):
+    def test_fact_sheet_is_user_data_not_system_instructions(self):
         client = _make_client(
             (GENERATE_TOOL_NAME, VALID_GENERATION_RESPONSE),
             (RANK_TOOL_NAME,     VALID_RANKING_RESPONSE),
         )
         _engine(client).generate(*_inputs())
         first_call_kwargs = client.messages.create.call_args_list[0].kwargs
-        assert "CANDIDATE NAME" in first_call_kwargs["system"]
+        assert "CANDIDATE NAME" not in first_call_kwargs["system"]
+        assert "CANDIDATE NAME" in first_call_kwargs["messages"][0]["content"]
 
-    def test_personality_in_system_prompt(self):
+    def test_personality_is_user_data(self):
         client = _make_client(
             (GENERATE_TOOL_NAME, VALID_GENERATION_RESPONSE),
             (RANK_TOOL_NAME,     VALID_RANKING_RESPONSE),
         )
         _engine(client).generate(*_inputs())
         first_call_kwargs = client.messages.create.call_args_list[0].kwargs
-        assert "Natural" in first_call_kwargs["system"]
+        assert "Natural" not in first_call_kwargs["system"]
+        assert "Natural" in first_call_kwargs["messages"][0]["content"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

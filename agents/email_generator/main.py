@@ -1,10 +1,11 @@
 """CLI: generate ranked email variants for a candidate/job/company."""
 from __future__ import annotations
+from security import private_write
 import argparse, json, pathlib, sys
 from agents.email_generator.engine import EmailGenerationEngine
 from agents.email_generator.schemas import CandidateProfile, CompanyInfo, JobAnalysis
 
-from config import get_settings, resolve_path
+from config import ModelSetupError, get_settings, resolve_path
 
 def main() -> None:
     settings = get_settings()
@@ -30,7 +31,10 @@ def main() -> None:
     company     = CompanyInfo.model_validate(json.loads(resolve_path(args.company).read_text()))
     personality = resolve_path(args.personality).read_text()
 
-    result = EmailGenerationEngine().generate(candidate, job, company, personality)
+    try:
+        result = EmailGenerationEngine().generate(candidate, job, company, personality)
+    except ModelSetupError as exc:
+        raise SystemExit(str(exc)) from None
     output = {
         "best": {
             "variant_type":        result.best_variant.variant_type.value,
@@ -53,8 +57,7 @@ def main() -> None:
     }
     out_json = json.dumps(output, indent=2)
     if args.output:
-        resolve_path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        resolve_path(args.output).write_text(out_json); print(f"Result written to {args.output}")
+            private_write(resolve_path(args.output), out_json); print(f"Result written to {args.output}")
     else:
         print(out_json)
 

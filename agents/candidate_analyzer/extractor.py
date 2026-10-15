@@ -1,10 +1,11 @@
 """PKB extractor — reads source files, calls Claude, returns validated Profile."""
 from __future__ import annotations
 import json
+from security import UNTRUSTED_RULE, untrusted_data
 import pathlib
 import textwrap
 import anthropic
-from config import get_settings, resolve_path
+from config import require_model_key, get_settings, resolve_path
 from agents.candidate_analyzer.models import Profile
 from agents.candidate_analyzer.readers import read_md, read_pdf
 
@@ -50,10 +51,10 @@ def extract_profile(
     projects_text     = read_md(projects_md)
     achievements_text = read_md(achievements_md)
 
-    client  = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    client  = anthropic.Anthropic(api_key=require_model_key())
     message = client.messages.create(
-        model=model or settings.LLM_MODEL, max_tokens=4096, system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": _build_user_prompt(resume_text, projects_text, achievements_text)}],
+        model=model or settings.LLM_MODEL, max_tokens=4096, system=SYSTEM_PROMPT + "\n" + UNTRUSTED_RULE,
+        messages=[{"role": "user", "content": untrusted_data("candidate_sources", _build_user_prompt(resume_text, projects_text, achievements_text))}],
     )
     raw = message.content[0].text.strip()
     if raw.startswith("```"):
@@ -61,8 +62,8 @@ def extract_profile(
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise ValueError(f"Claude returned invalid JSON: {raw[:300]}") from exc
+        raise ValueError("Model returned invalid profile JSON") from exc
     try:
         return Profile.model_validate(data)
     except Exception as exc:
-        raise ValueError(f"Profile validation failed: {exc}") from exc
+        raise ValueError("Profile failed schema validation") from exc

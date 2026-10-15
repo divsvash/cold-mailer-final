@@ -8,3 +8,20 @@ token.json
 *.db
 *.db-shm
 *.db-wal
+# Private runtime artifacts. Store generated outputs under these directories.
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+reports/
+private/
+outputs/
+*.report.json
+*report.json
+*contacts*.json
+memory/*
+# The tracked historical profile is sample data; do not replace it with private data.
+preview.json
+email-output.json
