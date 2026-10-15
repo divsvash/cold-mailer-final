@@ -6,17 +6,19 @@ import pathlib
 import sys
 from agents.candidate_analyzer.extractor import extract_profile
 
+from config import get_settings, resolve_path
 
 def main() -> None:
+    settings = get_settings()
     parser = argparse.ArgumentParser(description="Build candidate profile.json from source files")
-    parser.add_argument("--resume",       default="memory/resume.pdf")
-    parser.add_argument("--projects",     default="memory/projects.md")
-    parser.add_argument("--achievements", default="memory/achievements.md")
-    parser.add_argument("--output",       default="memory/profile.json")
+    parser.add_argument("--resume",       default=str(settings.RESUME_PATH))
+    parser.add_argument("--projects",     default=str(settings.PROJECTS_PATH))
+    parser.add_argument("--achievements", default=str(settings.ACHIEVEMENTS_PATH))
+    parser.add_argument("--output",       default=str(settings.PROFILE_PATH))
     args = parser.parse_args()
 
     for p, label in [(args.resume, "resume"), (args.projects, "projects"), (args.achievements, "achievements")]:
-        if not pathlib.Path(p).exists():
+        if not resolve_path(p).exists():
             print(f"ERROR: {label} file not found: {p}", file=sys.stderr)
             sys.exit(1)
 
@@ -27,7 +29,8 @@ def main() -> None:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    pathlib.Path(args.output).write_text(json.dumps(profile.model_dump(mode="json"), indent=2))
+    resolve_path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    resolve_path(args.output).write_text(json.dumps(profile.model_dump(mode="json"), indent=2))
     print(f"Profile written to {args.output}")
     print(f"  Skills: {len(profile.skills)}, Projects: {len(profile.projects)}, Experience: {len(profile.experience)}")
 
