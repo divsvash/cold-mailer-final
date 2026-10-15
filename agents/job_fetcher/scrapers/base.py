@@ -21,7 +21,7 @@ class BaseScraper(ABC):
     def __init__(self, client: httpx.AsyncClient | None = None) -> None:
         self._owned_client = client is None
         self._client = client or httpx.AsyncClient(
-            headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT, follow_redirects=True
+            headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT, follow_redirects=False
         )
 
     async def __aenter__(self) -> "BaseScraper":
@@ -38,7 +38,10 @@ class BaseScraper(ABC):
     def strip_html(html: str) -> str:
         if not html:
             return ""
-        text = BeautifulSoup(html, "html.parser").get_text(separator=" ")
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup(["script", "style", "noscript", "template"]):
+            tag.decompose()
+        text = soup.get_text(separator=" ")
         return re.sub(r"\s+", " ", text).strip()
 
     @staticmethod
@@ -77,3 +80,9 @@ class BaseScraper(ABC):
         if not isinstance(raw, str):
             return None
         return raw.strip() or None
+
+
+def validate_company_slug(company: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,99}", company):
+        raise ValueError("Invalid company slug; only letters, numbers, underscores and hyphens allowed")
+    return company
