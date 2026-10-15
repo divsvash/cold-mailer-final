@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+credentials.json
+token.json
+*.db
+*.db-shm
+*.db-wal
