@@ -25,21 +25,9 @@ def check(label: str, ok: bool, fix: str = "") -> bool:
     return ok
 
 
-def load_env() -> None:
-    env_file = ROOT / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, _, value = line.partition("=")
-                key = key.strip()
-                value = value.strip().strip('"').strip("'")
-                if key and key not in os.environ:
-                    os.environ[key] = value
-
-
 def main() -> None:
-    load_env()
+    from config import get_settings
+    settings = get_settings()
     all_ok = True
 
     # ── Python ─────────────────────────────────────────────────────────────────
@@ -79,7 +67,7 @@ def main() -> None:
     env_file = ROOT / ".env"
     check(".env file exists", env_file.exists(), "cp .env.example .env  then fill in your values")
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = settings.ANTHROPIC_API_KEY
     ok = check(
         "ANTHROPIC_API_KEY set",
         bool(api_key) and api_key != "your_anthropic_api_key_here",
@@ -89,7 +77,7 @@ def main() -> None:
 
     # ── Memory files ───────────────────────────────────────────────────────────
     print("\n🧠 Memory files")
-    profile = ROOT / "memory" / "profile.json"
+    profile = settings.PROFILE_PATH
     ok = check(
         "memory/profile.json exists",
         profile.exists(),
@@ -109,19 +97,19 @@ def main() -> None:
             check(f"profile.json is valid JSON", False, f"Fix JSON syntax: {exc}")
             all_ok = False
 
-    check("memory/resume.pdf exists",     (ROOT / "memory" / "resume.pdf").exists(),
+    check("memory/resume.pdf exists",     settings.RESUME_PATH.exists(),
           "Place your resume PDF at memory/resume.pdf")
-    check("memory/projects.md exists",    (ROOT / "memory" / "projects.md").exists(),
+    check("memory/projects.md exists",    settings.PROJECTS_PATH.exists(),
           "Create memory/projects.md with your project details")
-    check("memory/achievements.md exists",(ROOT / "memory" / "achievements.md").exists(),
+    check("memory/achievements.md exists",settings.ACHIEVEMENTS_PATH.exists(),
           "Create memory/achievements.md with your achievements")
-    check("prompts/personality.md exists",(ROOT / "prompts" / "personality.md").exists(),
+    check("prompts/personality.md exists",settings.PERSONALITY_PATH.exists(),
           "Create prompts/personality.md with your voice/tone guide")
 
     # ── Gmail ──────────────────────────────────────────────────────────────────
     print("\n📬 Gmail")
-    creds = ROOT / "credentials.json"
-    token = ROOT / "token.json"
+    creds = settings.GMAIL_CREDENTIALS_PATH
+    token = settings.GMAIL_TOKEN_PATH
 
     creds_ok = check(
         "credentials.json exists",

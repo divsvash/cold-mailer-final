@@ -1,6 +1,7 @@
 """SQLAlchemy storage for raw and normalized job records."""
 from __future__ import annotations
 import json
+from config import get_settings, prepare_database_url
 from datetime import datetime
 from sqlalchemy import Column, DateTime, Index, String, Text, UniqueConstraint, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -78,8 +79,8 @@ class JobRepository:
         return len(result.scalars().all())
 
 
-def make_engine(url: str):
-    return create_async_engine(url, echo=False)
+def make_engine(url: str | None = None):
+    return create_async_engine(prepare_database_url(url if url is not None else get_settings().DATABASE_URL), echo=False)
 
 async def init_db(engine) -> None:
     async with engine.begin() as conn:

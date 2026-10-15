@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import textwrap
 import anthropic
+from config import get_settings
 from agents.email_generator.fact_sheet import build_fact_sheet
 from agents.email_generator.schemas import (
     CandidateProfile, CompanyInfo, EmailRanking, EmailVariant,
@@ -130,9 +131,10 @@ def check_grounding(body: str, fact_sheet: str) -> list[str]:
 
 
 class EmailGenerationEngine:
-    def __init__(self, model: str = "claude-sonnet-4-20250514", client: anthropic.Anthropic | None = None) -> None:
-        self._model  = model
-        self._client = client or anthropic.Anthropic()
+    def __init__(self, model: str | None = None, client: anthropic.Anthropic | None = None) -> None:
+        self._model  = model or get_settings().LLM_MODEL
+        self._max_words = get_settings().EMAIL_MAX_WORDS
+        self._client = client or anthropic.Anthropic(api_key=get_settings().ANTHROPIC_API_KEY)
 
     def generate(
         self,
@@ -150,7 +152,7 @@ class EmailGenerationEngine:
         return RankedEmailResult(variants=variants, rankings=rankings, best_variant=best)
 
     def _generate_variants(self, fact_sheet: str, personality: str) -> list[EmailVariant]:
-        system = GENERATE_SYSTEM.format(max_words=MAX_WORDS, personality=personality, fact_sheet=fact_sheet)
+        system = GENERATE_SYSTEM.format(max_words=self._max_words, personality=personality, fact_sheet=fact_sheet)
         message = self._client.messages.create(
             model=self._model, max_tokens=4096, system=system,
             tools=[_generate_tool_schema()],
@@ -179,8 +181,8 @@ class EmailGenerationEngine:
 
     def _check_word_limits(self, variants: list[EmailVariant]) -> None:
         for v in variants:
-            if v.word_count > MAX_WORDS:
-                raise ValueError(f"Variant '{v.variant_type}' exceeds {MAX_WORDS}-word limit ({v.word_count}w)")
+            if v.word_count > self._max_words:
+                raise ValueError(f"Variant '{v.variant_type}' exceeds {self._max_words}-word limit ({v.word_count}w)")
 
     def _check_all_grounding(self, variants: list[EmailVariant], fact_sheet: str) -> None:
         for v in variants:

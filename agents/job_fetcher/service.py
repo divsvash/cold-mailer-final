@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 import httpx
+from config import get_settings
 from agents.job_fetcher.deduplicator import DeduplicationReport, merge_results
 from agents.job_fetcher.models import JobSource, ScrapeResult
 from agents.job_fetcher.scrapers.base import BaseScraper
@@ -18,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DiscoveryConfig:
-    greenhouse_companies: list[str] = field(default_factory=list)
-    lever_companies:      list[str] = field(default_factory=list)
-    include_yc:           bool      = True
-    db_url:               str       = "sqlite+aiosqlite:///jobs.db"
-    concurrency:          int       = 3
+    greenhouse_companies: list[str] = field(default_factory=lambda: get_settings().GREENHOUSE_COMPANIES.copy())
+    lever_companies:      list[str] = field(default_factory=lambda: get_settings().LEVER_COMPANIES.copy())
+    include_yc:           bool      = field(default_factory=lambda: get_settings().INCLUDE_YC_JOBS)
+    db_url:               str       = field(default_factory=lambda: get_settings().DATABASE_URL)
+    concurrency:          int       = field(default_factory=lambda: get_settings().MAX_CONCURRENT_SCRAPERS)
 
 
 @dataclass

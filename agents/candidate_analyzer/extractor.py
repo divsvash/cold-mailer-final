@@ -4,6 +4,7 @@ import json
 import pathlib
 import textwrap
 import anthropic
+from config import get_settings, resolve_path
 from agents.candidate_analyzer.models import Profile
 from agents.candidate_analyzer.readers import read_md, read_pdf
 
@@ -36,18 +37,22 @@ def _build_user_prompt(resume_text: str, projects_text: str, achievements_text: 
 
 
 def extract_profile(
-    resume_pdf:       str | pathlib.Path = "memory/resume.pdf",
-    projects_md:      str | pathlib.Path = "memory/projects.md",
-    achievements_md:  str | pathlib.Path = "memory/achievements.md",
-    model: str = "claude-sonnet-4-20250514",
+    resume_pdf:       str | pathlib.Path | None = None,
+    projects_md:      str | pathlib.Path | None = None,
+    achievements_md:  str | pathlib.Path | None = None,
+    model: str | None = None,
 ) -> Profile:
+    settings = get_settings()
+    resume_pdf = resolve_path(resume_pdf) if resume_pdf is not None else settings.RESUME_PATH
+    projects_md = resolve_path(projects_md) if projects_md is not None else settings.PROJECTS_PATH
+    achievements_md = resolve_path(achievements_md) if achievements_md is not None else settings.ACHIEVEMENTS_PATH
     resume_text       = read_pdf(resume_pdf)
     projects_text     = read_md(projects_md)
     achievements_text = read_md(achievements_md)
 
-    client  = anthropic.Anthropic()
+    client  = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
     message = client.messages.create(
-        model=model, max_tokens=4096, system=SYSTEM_PROMPT,
+        model=model or settings.LLM_MODEL, max_tokens=4096, system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": _build_user_prompt(resume_text, projects_text, achievements_text)}],
     )
     raw = message.content[0].text.strip()

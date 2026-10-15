@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import textwrap
 import anthropic
+from config import get_settings
 from agents.job_analyzer.schemas import JobUnderstanding, JobUnderstandingRequest, JobUnderstandingResponse
 
 TOOL_NAME = "record_job_understanding"
@@ -20,9 +21,9 @@ SYSTEM_PROMPT = textwrap.dedent("""
 
 
 class JobUnderstandingEngine:
-    def __init__(self, model: str = "claude-sonnet-4-20250514", client: anthropic.Anthropic | None = None) -> None:
-        self._model  = model
-        self._client = client or anthropic.Anthropic()
+    def __init__(self, model: str | None = None, client: anthropic.Anthropic | None = None) -> None:
+        self._model  = model or get_settings().LLM_MODEL
+        self._client = client or anthropic.Anthropic(api_key=get_settings().ANTHROPIC_API_KEY)
 
     def analyze(self, job_description: str) -> JobUnderstandingResponse:
         request = JobUnderstandingRequest(job_description=job_description)

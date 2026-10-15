@@ -78,8 +78,8 @@ class EmailVariant(BaseModel):
 
     @property
     def within_word_limit(self) -> bool:
-        from agents.email_generator.engine import MAX_WORDS
-        return self.word_count <= MAX_WORDS
+        from config import get_settings
+        return self.word_count <= get_settings().EMAIL_MAX_WORDS
 
 
 class EmailRanking(BaseModel):
