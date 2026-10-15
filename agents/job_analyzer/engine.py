@@ -1,9 +1,10 @@
 """Job Understanding Engine — forced tool-use, strict schema."""
 from __future__ import annotations
 import json
+from security import UNTRUSTED_RULE, untrusted_data
 import textwrap
 import anthropic
-from config import get_settings
+from config import require_model_key, get_settings
 from agents.job_analyzer.schemas import JobUnderstanding, JobUnderstandingRequest, JobUnderstandingResponse
 
 TOOL_NAME = "record_job_understanding"
@@ -23,7 +24,7 @@ SYSTEM_PROMPT = textwrap.dedent("""
 class JobUnderstandingEngine:
     def __init__(self, model: str | None = None, client: anthropic.Anthropic | None = None) -> None:
         self._model  = model or get_settings().LLM_MODEL
-        self._client = client or anthropic.Anthropic(api_key=get_settings().ANTHROPIC_API_KEY)
+        self._client = client or anthropic.Anthropic(api_key=require_model_key())
 
     def analyze(self, job_description: str) -> JobUnderstandingResponse:
         request = JobUnderstandingRequest(job_description=job_description)
@@ -34,9 +35,9 @@ class JobUnderstandingEngine:
             "input_schema": schema,
         }
         message = self._client.messages.create(
-            model=self._model, max_tokens=4096, system=SYSTEM_PROMPT,
+            model=self._model, max_tokens=4096, system=SYSTEM_PROMPT + "\n" + UNTRUSTED_RULE,
             tools=[tool], tool_choice={"type": "tool", "name": TOOL_NAME},
-            messages=[{"role": "user", "content": f"Job description:\n\n{request.job_description}"}],
+            messages=[{"role": "user", "content": untrusted_data("job_description", request.job_description)}],
         )
         tool_use = next((b for b in message.content if b.type == "tool_use"), None)
         if tool_use is None:
@@ -46,5 +47,5 @@ class JobUnderstandingEngine:
         try:
             result = JobUnderstanding.model_validate(tool_use.input)
         except Exception as exc:
-            raise ValueError(f"Tool input failed validation: {exc}") from exc
+            raise ValueError("Job analysis failed schema validation") from exc
         return JobUnderstandingResponse(result=result, model=self._model)
