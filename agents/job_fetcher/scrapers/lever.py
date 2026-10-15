@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import httpx
 from agents.job_fetcher.models import JobSource, NormalizedJob, RawJob, ScrapeResult
-from agents.job_fetcher.scrapers.base import BaseScraper
+from agents.job_fetcher.scrapers.base import BaseScraper, validate_company_slug
 
 LEVER_API = "https://api.lever.co/v0/postings/{company}"
 
@@ -15,7 +15,7 @@ class LeverScraper(BaseScraper):
         super().__init__(client)
         if not companies:
             raise ValueError("At least one company slug is required")
-        self._companies = companies
+        self._companies = [validate_company_slug(company) for company in companies]
 
     async def scrape(self) -> ScrapeResult:
         result = ScrapeResult(source=self.source)
