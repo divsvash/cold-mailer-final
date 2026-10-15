@@ -1,5 +1,6 @@
 """CLI: score a candidate profile against job requirements."""
 from __future__ import annotations
+from security import private_write
 import argparse, json, pathlib, sys
 from agents.recruiter_simulator.schemas import CandidateProfile, JobRequirements
 from agents.recruiter_simulator.scoring import assess
@@ -24,8 +25,7 @@ def main() -> None:
     out       = json.dumps(result.model_dump(mode="json"), indent=2)
 
     if args.output:
-        resolve_path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        resolve_path(args.output).write_text(out)
+        private_write(resolve_path(args.output), out)
         print(f"Assessment written to {args.output}")
     else:
         print(out)
