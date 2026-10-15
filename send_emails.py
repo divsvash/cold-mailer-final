@@ -45,7 +45,7 @@ from config import get_settings, resolve_path
 
 def _check_env(settings, profile_path, personality_path) -> None:
     errors = []
-    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here":
+    if not settings.ANTHROPIC_API_KEY.strip() or settings.ANTHROPIC_API_KEY.strip() == "your_anthropic_api_key_here":
         errors.append("Model API key missing. Set ANTHROPIC_API_KEY in .env or the environment.")
     for path, label in [(profile_path, "Profile"), (personality_path, "Personality guide")]:
         if not path.is_file():
@@ -145,7 +145,7 @@ async def main() -> None:
                 culture=[c.value for c in understanding.result.culture],
             )
         except Exception as exc:
-            print(f"⚠️  Could not parse JD ({exc}), using minimal job context.")
+            print(f"⚠️  Could not parse JD ({type(exc).__name__}), using minimal job context.")
             job = JobAnalysis()
     else:
         job = JobAnalysis()
@@ -156,7 +156,7 @@ async def main() -> None:
     try:
         result = engine.generate(candidate, job, company, personality)
     except Exception as exc:
-        print(f"❌ Email generation failed: {exc}", file=sys.stderr)
+        print(f"❌ Email generation failed: {type(exc).__name__}", file=sys.stderr)
         sys.exit(1)
 
     # ── Display ────────────────────────────────────────────────────────────────
@@ -202,7 +202,7 @@ async def main() -> None:
         from database.draft_models import DraftRequest
         from database.draft_storage import init_db, make_engine, make_session_factory
     except ImportError as exc:
-        print(f"❌ Gmail integration not available: {exc}", file=sys.stderr)
+        print(f"❌ Gmail integration not available: {type(exc).__name__}", file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -216,7 +216,7 @@ async def main() -> None:
         print("   and place it in the career-agent/ root directory.")
         sys.exit(1)
     except Exception as exc:
-        print(f"❌ Gmail auth failed: {exc}", file=sys.stderr)
+        print(f"❌ Gmail auth failed: {type(exc).__name__}", file=sys.stderr)
         sys.exit(1)
 
     gmail_client = GmailDraftClient(gmail_service)
