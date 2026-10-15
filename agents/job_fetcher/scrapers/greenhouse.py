@@ -4,7 +4,7 @@ import json
 from typing import Any
 import httpx
 from agents.job_fetcher.models import JobSource, NormalizedJob, RawJob, ScrapeResult
-from agents.job_fetcher.scrapers.base import BaseScraper
+from agents.job_fetcher.scrapers.base import BaseScraper, validate_company_slug
 
 GREENHOUSE_API = "https://boards-api.greenhouse.io/v1/boards/{company}/jobs"
 
@@ -16,7 +16,7 @@ class GreenhouseScraper(BaseScraper):
         super().__init__(client)
         if not companies:
             raise ValueError("At least one company slug is required")
-        self._companies = companies
+        self._companies = [validate_company_slug(company) for company in companies]
 
     async def scrape(self) -> ScrapeResult:
         result = ScrapeResult(source=self.source)

@@ -15,7 +15,7 @@ class DraftCreationFailedError(Exception):
         self.request     = request
         self.original    = original
         self.retry_count = retry_count
-        super().__init__(f"Failed to create draft for {request.to} after {retry_count} attempt(s): {original}")
+        super().__init__(f"Draft creation failed after {retry_count} attempt(s): {type(original).__name__}")
 
 
 class DraftService:
