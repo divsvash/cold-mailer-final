@@ -1,5 +1,6 @@
 """CLI: regenerate profile.json from source files."""
 from __future__ import annotations
+from security import private_write
 import argparse
 import json
 import pathlib
@@ -29,8 +30,7 @@ def main() -> None:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    resolve_path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    resolve_path(args.output).write_text(json.dumps(profile.model_dump(mode="json"), indent=2))
+    private_write(resolve_path(args.output), json.dumps(profile.model_dump(mode="json"), indent=2))
     print(f"Profile written to {args.output}")
     print(f"  Skills: {len(profile.skills)}, Projects: {len(profile.projects)}, Experience: {len(profile.experience)}")
 
